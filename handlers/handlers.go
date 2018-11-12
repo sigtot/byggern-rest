@@ -1,54 +1,65 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/sigtot/byggern-rest/serial"
 	"log"
 	"net/http"
 )
 
-const serialName = "/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_95334323430351A00182-if00"
+const serialName = "/dev/ttyACM0"
 const serialBaud = 9600
 const serialStopBits = 2
 
-func HandleMotorInput(w http.ResponseWriter, r *http.Request) {
-	conn, err := serial.CreateConnection(
-		serialName,
-		serialBaud,
-		serialStopBits)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err)
-		return
-	}
-	defer conn.Close()
+type ValueInput struct {
+	Value int `json:"value"`
+}
 
-	err = conn.Write(fmt.Sprintf("{motor=%d}", 120)) // TODO: Get motor value from url
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Fatal(err)
-	}
+func HandleMotorInput(w http.ResponseWriter, r *http.Request) {
+	handleMotorBoxInput(w, r, "motor")
 }
 
 func HandleServoInput(w http.ResponseWriter, r *http.Request) {
-	conn, err := serial.CreateConnection(
-		serialName,
-		serialBaud,
-		serialStopBits)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err)
-		return
-	}
-	defer conn.Close()
-
-	err = conn.Write(fmt.Sprintf("{servo=%d}", 30)) // TODO: Get servo value from url
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err)
-	}
+	handleMotorBoxInput(w, r, "servo")
 }
 
 func HandleSolenoidKick(w http.ResponseWriter, r *http.Request) {
 	// TODO: Implement solenoid kick endpoint
+}
+
+func handleMotorBoxInput(w http.ResponseWriter, r *http.Request, inputKey string) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var input ValueInput
+	err := decoder.Decode(&input)
+	if err != nil {
+		log.Println(err)
+	}
+
+	conn, err := serial.CreateConnection(
+		serialName,
+		serialBaud,
+		serialStopBits)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+
+	err = conn.Write(fmt.Sprintf("{%s=%d}", inputKey, input.Value))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+	}
+
+	err = conn.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatal("error" + err.Error())
+	}
 }
