@@ -16,14 +16,49 @@ type ValueInput struct {
 	Value int `json:"value"`
 }
 
-func HandleMotorInput(w http.ResponseWriter, r *http.Request) {
+func HandleMotorPost(w http.ResponseWriter, r *http.Request) {
 	handleMotorBoxInput(w, r, "motor")
 }
 
-func HandleServoInput(w http.ResponseWriter, r *http.Request) {
+func HandleServoPost(w http.ResponseWriter, r *http.Request) {
 	handleMotorBoxInput(w, r, "servo")
 }
 
+func HandleStateGet(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodGet {
+		http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+    conn, err := serial.CreateConnection(
+		serialName,
+		serialBaud,
+		serialStopBits)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+
+	err = conn.Write("{GET}")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+	}
+
+	uartResponse, err := conn.ReadLine()
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        log.Println(err)
+    }
+	fmt.Println(uartResponse)
+
+	err = conn.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatal("error" + err.Error())
+	}
+
+}
 func HandleSolenoidKick(w http.ResponseWriter, r *http.Request) {
 	// TODO: Implement solenoid kick endpoint
 }
