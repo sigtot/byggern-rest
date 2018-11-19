@@ -19,9 +19,11 @@ go build
 
 ## API Docs
 The API has the api root /api/ and available endpoints 
-* /api/servo
-* /api/motor
-* /api/solenoid
+* /api/servo (POST)
+* /api/motor (POST)
+* /api/solenoid (POST)
+* /api/pid (POST)
+* /api/state (GET)
 
 ### The following endpoints have been implemented so far:
 #### Servo value (POST)
@@ -29,7 +31,25 @@ The API has the api root /api/ and available endpoints
 curl localhost:8000/api/servo -X POST -d '{"value":80}'
 ```
 
-#### Motor value (POST)
+#### Motor reference (POST)
 ```bash
 curl localhost:8000/api/motor -X POST -d '{"value":80}'
+```
+
+#### Solenoid kick (POST)
+```bash
+curl localhost:8000/api/solenoid -X POST
+```
+
+#### PID controller parameters (POST)
+**Note**:
+Control parameters are divided by 1000 and converted to float on the server.
+Thus, sending `"Kp": 500` corresponds to setting `Kp` to 0.5 on the machine. 
+```bash
+curl localhost:8000/api/pid -X POST -d '{"KP": 500, "KI": 10, "KD": 100}'
+```
+
+#### State (GET)
+```bash
+curl localhost:8000/api/state
 ```
