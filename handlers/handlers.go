@@ -25,14 +25,17 @@ func SetSerialConnection(connection serial.Connection) {
 }
 
 func HandleMotorPost(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	handleMotorBoxInput(w, r, "motor")
 }
 
 func HandleServoPost(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	handleMotorBoxInput(w, r, "servo")
 }
 
 func HandlePIDParamsPost(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method != http.MethodPost {
 		http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -55,6 +58,7 @@ func HandlePIDParamsPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleStateGet(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method != http.MethodGet {
 		http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -79,6 +83,7 @@ func HandleStateGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleSolenoidKick(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method != http.MethodPost {
 		http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
 		return
