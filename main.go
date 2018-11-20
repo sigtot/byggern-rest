@@ -29,6 +29,8 @@ func main() {
 	http.HandleFunc(apiRoot+"state", handlers.HandleStateGet)
 	http.HandleFunc(apiRoot+"solenoid", handlers.HandleSolenoidKick)
 	http.HandleFunc(apiRoot+"pid", handlers.HandlePIDParamsPost)
+
+        http.Handle("/", http.FileServer(http.Dir("./byggern-frontend")))
 	if err := http.ListenAndServe(port, nil); err != nil {
 		panic(err)
 	}
